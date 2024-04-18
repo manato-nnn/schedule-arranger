@@ -42,8 +42,9 @@ app.use("/auth/github", async (c, next) => {
     client_id: GITHUB_CLIENT_ID,
     client_secret: GITHUB_CLIENT_SECRET,
     scope: ["user:email"],
+    oauthApp: true,
   });
-  return await authHandler(c, next).catch(() => c.redirect("/login"));
+  return await authHandler(c, next);
 });
 
 // GitHub 認証の後の処理
@@ -76,6 +77,7 @@ app.route("/logout", logoutRouter);
 app.notFound((c) => {
   return c.html(
     layout(
+      c,
       "Not Found",
       html`
         <h1>Not Found</h1>
@@ -88,10 +90,12 @@ app.notFound((c) => {
 
 // エラーハンドリング
 app.onError((error, c) => {
+  console.error(error);
   const statusCode = error instanceof HTTPException ? error.status : 500;
   const { NODE_ENV } = env(c);
   return c.html(
     layout(
+      c,
       "Error",
       html`
         <h1>Error</h1>
